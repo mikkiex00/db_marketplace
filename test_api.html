@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uji API Pesanan - Marketplace</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Uji Endpoint POST /api/pesanan.php</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="orderForm">
+                            <div class="mb-3">
+                                <label for="buyer_id" class="form-label">Buyer ID (Pembeli):</label>
+                                <input type="number" class="form-control" id="buyer_id" value="2" required>
+                                <div class="form-text">Pastikan ID user dengan role 'buyer' sudah ada di database.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="product_id" class="form-label">Product ID (Produk):</label>
+                                <input type="number" class="form-control" id="product_id" value="1" required>
+                                <div class="form-text">Pastikan ID produk tersedia dan stok mencukupi.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label">Jumlah (Quantity):</label>
+                                <input type="number" class="form-control" id="quantity" value="1" min="1" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100">Kirim POST Request</button>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <h5>Response dari Server:</h5>
+                        <pre id="responseOutput" class="bg-dark text-light p-3 rounded" style="min-height: 120px; font-size: 13px;">Belum ada request yang dikirim...</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('orderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const buyerId = parseInt(document.getElementById('buyer_id').value);
+            const productId = parseInt(document.getElementById('product_id').value);
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            const payload = {
+                buyer_id: buyerId,
+                items: [
+                    {
+                        product_id: productId,
+                        quantity: quantity
+                    }
+                ]
+            };
+
+            const outputBox = document.getElementById('responseOutput');
+            outputBox.textContent = "Mengirim request...";
+
+            try {
+                const response = await fetch('http://localhost/db_marketplace/api/pesanan.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                
+                outputBox.textContent = JSON.stringify(result, null, 2);
+
+                if (response.ok) {
+                    alert("Pesanan berhasil dibuat! Cek database phpMyAdmin Anda.");
+                } else {
+                    alert("Gagal: " + (result.message || "Terjadi kesalahan"));
+                }
+
+            } catch (error) {
+                outputBox.textContent = "Error koneksi: " + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
